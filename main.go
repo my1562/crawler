@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/my1562/crawler/apiclient"
 	"github.com/my1562/crawler/config"
@@ -28,7 +31,12 @@ func main() {
 		})
 
 	err := c.Invoke(func(tasks *tasks.Tasks) {
-		tasks.GetNextAddressCheckAndStore()
+		for {
+			delay := tasks.GetDelay()
+			tasks.GetNextAddressCheckAndStore()
+			fmt.Printf("Sleeping %f minutes", float32(delay)/float32(time.Minute))
+			time.Sleep(delay)
+		}
 	})
 	if err != nil {
 		panic(err)

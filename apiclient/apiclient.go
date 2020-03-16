@@ -44,6 +44,25 @@ func (api *ApiClient) TakeNextAddress() (*models.AddressAr, error) {
 	return result.(*AddressResponse).Result, nil
 }
 
+func (api *ApiClient) GetAddressCount() (int64, error) {
+	type Response struct {
+		Result int64
+	}
+
+	resp, err := api.client.R().
+		SetResult(&Response{}).
+		SetError(&ErrorResponse{}).
+		Get("/address/count")
+	if err != nil {
+		return 0, err
+	}
+	if backendError := resp.Error(); backendError != nil {
+		return 0, backendError.(*ErrorResponse)
+	}
+	result := resp.Result()
+	return result.(*Response).Result, nil
+}
+
 func (api *ApiClient) UpdateAddress(id int64, status models.AddressArCheckStatus, message string) error {
 	type UpdateAddressRequest struct {
 		CheckStatus    models.AddressArCheckStatus

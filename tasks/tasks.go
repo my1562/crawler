@@ -2,11 +2,18 @@ package tasks
 
 import (
 	"fmt"
+	"time"
 
 	my1562client "github.com/my1562/client"
 	"github.com/my1562/crawler/apiclient"
 	"github.com/my1562/crawler/models"
 	"github.com/my1562/geocoder"
+)
+
+const (
+	BestTotalTime int64 = 2 * 60 * 60
+	MinDelay            = 5 * 60
+	MaxDelay            = 30 * 60
 )
 
 type Tasks struct {
@@ -22,6 +29,25 @@ func New(
 		client: client,
 		geo:    geo,
 	}
+}
+
+func (tasks *Tasks) GetDelay() time.Duration {
+	addrCount, err := tasks.client.GetAddressCount()
+	if err != nil {
+		panic(err)
+	}
+	if addrCount <= 0 {
+		addrCount = 1
+	}
+	delay := BestTotalTime / addrCount
+	if delay > MaxDelay {
+		delay = MaxDelay
+	}
+	if delay < MinDelay {
+		delay = MinDelay
+	}
+
+	return time.Duration(delay) * time.Second
 }
 
 func (tasks *Tasks) GetNextAddressCheckAndStore() {

@@ -30,9 +30,24 @@ func main() {
 		})
 
 	err := c.Invoke(func(tasks *tasks.Tasks) {
+		retryInterval := time.Second * 10
+
 		for {
-			delay := tasks.GetDelay()
-			tasks.GetNextAddressCheckAndStore()
+			delay, err := tasks.GetDelay()
+			if err != nil {
+				fmt.Printf("GetDelay error %s\n", err)
+				fmt.Printf("Retrying in %d seconds\n", retryInterval/time.Second)
+				time.Sleep(retryInterval)
+				continue
+			}
+			err = tasks.GetNextAddressCheckAndStore()
+			if err != nil {
+				fmt.Printf("GetNextAddressCheckAndStore error %s\n", err)
+				fmt.Printf("Retrying in %d seconds\n", retryInterval/time.Second)
+				time.Sleep(retryInterval)
+				continue
+			}
+
 			fmt.Printf("Sleeping %f minutes", float32(delay)/float32(time.Minute))
 			time.Sleep(delay)
 		}
@@ -40,5 +55,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 }

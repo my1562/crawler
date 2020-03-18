@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -31,10 +32,10 @@ func New(
 	}
 }
 
-func (tasks *Tasks) GetDelay() time.Duration {
+func (tasks *Tasks) GetDelay() (time.Duration, error) {
 	addrCount, err := tasks.client.GetAddressCount()
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	if addrCount <= 0 {
 		addrCount = 1
@@ -47,24 +48,24 @@ func (tasks *Tasks) GetDelay() time.Duration {
 		delay = MinDelay
 	}
 
-	return time.Duration(delay) * time.Second
+	return time.Duration(delay) * time.Second, nil
 }
 
-func (tasks *Tasks) GetNextAddressCheckAndStore() {
+func (tasks *Tasks) GetNextAddressCheckAndStore() error {
 	addr, err := tasks.client.TakeNextAddress()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	fullAddress := tasks.geo.AddressByID(uint32(addr.ID))
 	if fullAddress == nil {
-		panic("No such address") //TODO: skip it and notify invalid address
+		return errors.New("No such address") //TODO: skip it and notify invalid address
 	}
 	building := fullAddress.Address.GetBuildingAsString()
 	streetID := int(fullAddress.Street1562.ID)
 	fmt.Printf("(Address.ID=%d) (Street1562.ID=%d) %s %s\n", fullAddress.Address.ID, streetID, fullAddress.Street1562.Name, building)
 	status, err := my1562client.GetStatus(streetID, building)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	fmt.Println("Status:")
 	fmt.Printf(" - Title       %s\n", status.Title)
@@ -83,7 +84,8 @@ func (tasks *Tasks) GetNextAddressCheckAndStore() {
 
 	err = tasks.client.UpdateAddress(int64(fullAddress.Address.ID), checkStatus, message)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
+	return nil
 }

@@ -1,7 +1,6 @@
 package tasks
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/my1562/crawler/apiclient"
 	"github.com/my1562/crawler/models"
 	"github.com/my1562/crawler/utils"
-	"github.com/my1562/geocoder"
 )
 
 const (
@@ -20,16 +18,13 @@ const (
 
 type Tasks struct {
 	client *apiclient.ApiClient
-	geo    *geocoder.Geocoder
 }
 
 func New(
 	client *apiclient.ApiClient,
-	geo *geocoder.Geocoder,
 ) *Tasks {
 	return &Tasks{
 		client: client,
-		geo:    geo,
 	}
 }
 
@@ -57,13 +52,13 @@ func (tasks *Tasks) GetNextAddressCheckAndStore() error {
 	if err != nil {
 		return err
 	}
-	fullAddress := tasks.geo.AddressByID(uint32(addr.ID))
-	if fullAddress == nil {
-		return errors.New("No such address") //TODO: skip it and notify invalid address
-	}
-	building := fullAddress.Address.GetBuildingAsString()
-	streetID := int(fullAddress.Street1562.ID)
-	fmt.Printf("(Address.ID=%d) (Street1562.ID=%d) %s %s\n", fullAddress.Address.ID, streetID, fullAddress.Street1562.Name, building)
+
+	id := addr.Address.ID
+	building := addr.GeocoderAddress.Building
+	streetID := int(addr.GeocoderAddress.Street1562ID)
+
+	fmt.Printf("(streetID=%d) %s\n", streetID, addr.GeocoderAddress.Address)
+
 	status, err := my1562client.GetStatus(streetID, building)
 	if err != nil {
 		return err
@@ -81,7 +76,7 @@ func (tasks *Tasks) GetNextAddressCheckAndStore() error {
 		checkStatus = models.AddressStatusNoWork
 	}
 
-	err = tasks.client.UpdateAddress(int64(fullAddress.Address.ID), checkStatus, message, status.Hash)
+	err = tasks.client.UpdateAddress(id, checkStatus, message, status.Hash)
 	if err != nil {
 		return err
 	}

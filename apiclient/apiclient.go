@@ -24,10 +24,22 @@ func New(client *resty.Client) *ApiClient {
 	return &ApiClient{client: client}
 }
 
-func (api *ApiClient) TakeNextAddress() (*models.AddressAr, error) {
+type ShortGeocoderAddress struct {
+	ID             uint32
+	Address        string
+	Building       string
+	Street1562ID   uint32
+	Street1562Name string
+}
+type TakeNextResponse struct {
+	Address         *models.AddressAr
+	GeocoderAddress *ShortGeocoderAddress
+}
+
+func (api *ApiClient) TakeNextAddress() (*TakeNextResponse, error) {
 
 	type AddressResponse struct {
-		Result *models.AddressAr `json:"result,omitempty"`
+		Result *TakeNextResponse `json:"result,omitempty"`
 	}
 
 	resp, err := api.client.R().

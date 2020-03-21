@@ -8,7 +8,6 @@ import (
 	"github.com/my1562/crawler/apiclient"
 	"github.com/my1562/crawler/config"
 	"github.com/my1562/crawler/tasks"
-	"github.com/my1562/geocoder"
 	"go.uber.org/dig"
 )
 
@@ -22,12 +21,6 @@ func main() {
 	c.Provide(config.NewConfig)
 	c.Provide(apiclient.New)
 	c.Provide(tasks.New)
-	c.Provide(
-		func(conf *config.Config) (*geocoder.Geocoder, error) {
-			geo := geocoder.NewGeocoder()
-			geo.BuildSpatialIndex(100)
-			return geo, nil
-		})
 
 	err := c.Invoke(func(tasks *tasks.Tasks) {
 		retryInterval := time.Second * 10

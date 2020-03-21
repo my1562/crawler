@@ -7,6 +7,5 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/my1562/client v0.0.1
-	github.com/my1562/geocoder v0.3.2
 	go.uber.org/dig v1.8.0
 )

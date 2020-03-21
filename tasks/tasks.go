@@ -8,6 +8,7 @@ import (
 	my1562client "github.com/my1562/client"
 	"github.com/my1562/crawler/apiclient"
 	"github.com/my1562/crawler/models"
+	"github.com/my1562/crawler/utils"
 	"github.com/my1562/geocoder"
 )
 
@@ -67,22 +68,20 @@ func (tasks *Tasks) GetNextAddressCheckAndStore() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Status:")
-	fmt.Printf(" - Title       %s\n", status.Title)
-	fmt.Printf(" - Description %s\n", status.Description)
-	fmt.Printf(" - HasMessage  %t\n", status.HasMessage)
 
-	var message string
+	message := utils.FormatServiceMessage(status)
+	fmt.Println("Status:")
+	fmt.Println(message)
+	fmt.Printf("HasMessage:  %t\n", status.HasMessage)
+
 	var checkStatus models.AddressArCheckStatus
 	if status.HasMessage {
 		checkStatus = models.AddressStatusWork
-		message = status.Title + "\n" + status.Description
 	} else {
 		checkStatus = models.AddressStatusNoWork
-		message = ""
 	}
 
-	err = tasks.client.UpdateAddress(int64(fullAddress.Address.ID), checkStatus, message)
+	err = tasks.client.UpdateAddress(int64(fullAddress.Address.ID), checkStatus, message, status.Hash)
 	if err != nil {
 		return err
 	}

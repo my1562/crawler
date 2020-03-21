@@ -63,10 +63,11 @@ func (api *ApiClient) GetAddressCount() (int64, error) {
 	return result.(*Response).Result, nil
 }
 
-func (api *ApiClient) UpdateAddress(id int64, status models.AddressArCheckStatus, message string) error {
+func (api *ApiClient) UpdateAddress(id int64, status models.AddressArCheckStatus, message string, hash string) error {
 	type UpdateAddressRequest struct {
 		CheckStatus    models.AddressArCheckStatus
 		ServiceMessage string
+		Hash           string
 	}
 
 	resp, err := api.client.R().
@@ -77,6 +78,7 @@ func (api *ApiClient) UpdateAddress(id int64, status models.AddressArCheckStatus
 		SetBody(&UpdateAddressRequest{
 			CheckStatus:    status,
 			ServiceMessage: message,
+			Hash:           hash,
 		}).
 		Put("/address/{id}")
 	if err != nil {

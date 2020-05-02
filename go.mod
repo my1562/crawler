@@ -8,4 +8,5 @@ require (
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/my1562/client v0.0.1
 	go.uber.org/dig v1.8.0
+	google.golang.org/appengine v1.6.6 // indirect
 )

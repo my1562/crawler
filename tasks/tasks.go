@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	my1562client "github.com/my1562/client"
@@ -48,6 +48,9 @@ func (tasks *Tasks) GetDelay() (time.Duration, error) {
 }
 
 func (tasks *Tasks) GetNextAddressCheckAndStore() error {
+	log.Println("---- GetNextAddressCheckAndStore START ----")
+	defer log.Println("---- GetNextAddressCheckAndStore END ----")
+
 	addr, err := tasks.client.TakeNextAddress()
 	if err != nil {
 		return err
@@ -57,7 +60,7 @@ func (tasks *Tasks) GetNextAddressCheckAndStore() error {
 	building := addr.GeocoderAddress.Building
 	streetID := int(addr.GeocoderAddress.Street1562ID)
 
-	fmt.Printf("(streetID=%d) %s\n", streetID, addr.GeocoderAddress.Address)
+	log.Printf("(streetID=%d) %s\n", streetID, addr.GeocoderAddress.Address)
 
 	status, err := my1562client.GetStatus(streetID, building)
 	if err != nil {
@@ -65,9 +68,9 @@ func (tasks *Tasks) GetNextAddressCheckAndStore() error {
 	}
 
 	message := utils.FormatServiceMessage(status)
-	fmt.Println("Status:")
-	fmt.Println(message)
-	fmt.Printf("HasMessage:  %t\n", status.HasMessage)
+	log.Println("Status:")
+	log.Println(message)
+	log.Printf("HasMessage:  %t\n", status.HasMessage)
 
 	var checkStatus models.AddressArCheckStatus
 	if status.HasMessage {

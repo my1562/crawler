@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -28,20 +28,20 @@ func main() {
 		for {
 			delay, err := tasks.GetDelay()
 			if err != nil {
-				fmt.Printf("GetDelay error %s\n", err)
-				fmt.Printf("Retrying in %d seconds\n", retryInterval/time.Second)
+				log.Printf("GetDelay error %s\n", err)
+				log.Printf("Retrying in %d seconds\n", retryInterval/time.Second)
 				time.Sleep(retryInterval)
 				continue
 			}
 			err = tasks.GetNextAddressCheckAndStore()
 			if err != nil {
-				fmt.Printf("GetNextAddressCheckAndStore error %s\n", err)
-				fmt.Printf("Retrying in %d seconds\n", retryInterval/time.Second)
+				log.Printf("GetNextAddressCheckAndStore error %s\n", err)
+				log.Printf("Retrying in %d seconds\n", retryInterval/time.Second)
 				time.Sleep(retryInterval)
 				continue
 			}
 
-			fmt.Printf("Sleeping %f minutes", float32(delay)/float32(time.Minute))
+			log.Printf("Sleeping %f minutes\n", float32(delay)/float32(time.Minute))
 			time.Sleep(delay)
 		}
 	})

@@ -45,7 +45,7 @@ func (api *ApiClient) TakeNextAddress() (*TakeNextResponse, error) {
 	resp, err := api.client.R().
 		SetResult(&AddressResponse{}).
 		SetError(&ErrorResponse{}).
-		Post("/address/take")
+		Post("/address-take")
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (api *ApiClient) GetAddressCount() (int64, error) {
 	resp, err := api.client.R().
 		SetResult(&Response{}).
 		SetError(&ErrorResponse{}).
-		Get("/address/count")
+		Get("/address-count")
 	if err != nil {
 		return 0, err
 	}

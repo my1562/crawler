@@ -20,7 +20,7 @@ type Tasks struct {
 	client *apiclient.ApiClient
 }
 
-func New(
+func NewTasks(
 	client *apiclient.ApiClient,
 ) *Tasks {
 	return &Tasks{
@@ -48,10 +48,20 @@ func (tasks *Tasks) GetDelay() (time.Duration, error) {
 }
 
 func (tasks *Tasks) GetNextAddressCheckAndStore() error {
-	log.Println("---- GetNextAddressCheckAndStore START ----")
-	defer log.Println("---- GetNextAddressCheckAndStore END ----")
+	log.Printf("Regular address check")
+	return tasks.getAddressCheckAndStore(0)
+}
 
-	addr, err := tasks.client.TakeNextAddress()
+func (tasks *Tasks) PriorityCheck(addressID int64) error {
+	log.Printf("Prioritized address check: %d", addressID)
+	return tasks.getAddressCheckAndStore(addressID)
+}
+
+func (tasks *Tasks) getAddressCheckAndStore(addressID int64) error {
+	log.Println("---- getAddressCheckAndStore START ----")
+	defer log.Println("---- getAddressCheckAndStore END ----")
+
+	addr, err := tasks.client.TakeNextAddress(addressID)
 	if err != nil {
 		return err
 	}

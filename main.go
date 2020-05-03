@@ -8,6 +8,7 @@ import (
 	"github.com/my1562/crawler/apiclient"
 	"github.com/my1562/crawler/config"
 	"github.com/my1562/crawler/tasks"
+	"github.com/my1562/crawler/worker"
 	"go.uber.org/dig"
 )
 
@@ -19,10 +20,17 @@ func main() {
 		return client
 	})
 	c.Provide(config.NewConfig)
-	c.Provide(apiclient.New)
-	c.Provide(tasks.New)
+	c.Provide(apiclient.NewApiClient)
+	c.Provide(tasks.NewTasks)
+	c.Provide(worker.NewWorker)
 
-	err := c.Invoke(func(tasks *tasks.Tasks) {
+	err := c.Invoke(func(tasks *tasks.Tasks, worker *worker.Worker) {
+		go func() {
+			if err := worker.Listen(); err != nil {
+				log.Panic(err)
+			}
+		}()
+
 		retryInterval := time.Second * 10
 
 		for {

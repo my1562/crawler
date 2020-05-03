@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	ApiUrl string
+	Redis  string
 }
 
 func NewConfig() *Config {
@@ -27,6 +28,10 @@ func NewConfig() *Config {
 
 	config := &Config{
 		ApiUrl: os.Getenv("API_URL"),
+		Redis:  os.Getenv("REDIS"),
+	}
+	if config.Redis == "" {
+		config.Redis = "127.0.0.1:6379"
 	}
 
 	return config

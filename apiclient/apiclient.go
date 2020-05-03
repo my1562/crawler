@@ -19,7 +19,7 @@ func (e *ErrorResponse) Error() string {
 	return e.ErrorValue
 }
 
-func New(client *resty.Client) *ApiClient {
+func NewApiClient(client *resty.Client) *ApiClient {
 	client.SetDebug(true)
 	return &ApiClient{client: client}
 }
@@ -36,16 +36,27 @@ type TakeNextResponse struct {
 	GeocoderAddress *ShortGeocoderAddress
 }
 
-func (api *ApiClient) TakeNextAddress() (*TakeNextResponse, error) {
+func (api *ApiClient) TakeNextAddress(addressID int64) (*TakeNextResponse, error) {
 
 	type AddressResponse struct {
 		Result *TakeNextResponse `json:"result,omitempty"`
 	}
 
-	resp, err := api.client.R().
+	var url string
+	request := api.client.R().
 		SetResult(&AddressResponse{}).
-		SetError(&ErrorResponse{}).
-		Post("/address-take")
+		SetError(&ErrorResponse{})
+	if addressID == 0 {
+		url = "/address-take"
+	} else {
+		url = "/address-take/{id}"
+		request = request.
+			SetPathParams(map[string]string{
+				"id": strconv.FormatInt(addressID, 10),
+			})
+	}
+
+	resp, err := request.Post(url)
 	if err != nil {
 		return nil, err
 	}
